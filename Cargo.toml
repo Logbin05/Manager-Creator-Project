@@ -1,0 +1,17 @@
+[package]
+name = "manager-creator-project"
+version = "0.1.0"
+edition = "2024"
+description = "Interactive project generator: Rust backend and React with your choice of libraries"
+license = "MIT"
+repository = "https://github.com/Logbin05/manager-creator-project"
+readme = "README.md"
+
+[[bin]]
+name = "mcp"
+path = "src/main.rs"
+
+[dependencies]
+cliclack = "0.5.6"
+console-subscriber = "0.5.0"
+crossterm = "0.29.0"
