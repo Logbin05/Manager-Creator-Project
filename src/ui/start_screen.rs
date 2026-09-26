@@ -6,7 +6,13 @@ use crossterm::{
     style::{Print, Stylize},
     terminal::{self, ClearType},
 };
-use std::io::{self, Write};
+use std::{
+    io::{self, Write},
+    sync::{Arc, Mutex},
+    time::Duration,
+};
+
+pub type Notice = Arc<Mutex<Option<String>>>;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum MenuItem {
@@ -29,7 +35,7 @@ const BOX_INNER: usize = 32;
 const MENU_H: u16 = MENU.len() as u16 + 3;
 const HINTS: &[(&str, &str)] = &[("↑↓", "navigate"), ("enter", "select"), ("q", "quit")];
 
-const BELOW_LOGO: u16 = 1 + 1 + 1 + MENU_H + 1 + 1;
+const BELOW_LOGO: u16 = 1 + 1 + 1 + MENU_H + 1 + 1 + 2;
 
 #[derive(Default)]
 struct Menu {
@@ -66,7 +72,12 @@ impl Menu {
     }
 }
 
-fn render(out: &mut impl Write, menu: &Menu, truecolor: bool) -> io::Result<()> {
+fn render(
+    out: &mut impl Write,
+    menu: &Menu,
+    truecolor: bool,
+    notice: Option<&str>,
+) -> io::Result<()> {
     let (term_w, term_h) = terminal::size()?;
     let logo = logo::pick(
         term_w.saturating_sub(4) as usize,
@@ -92,6 +103,14 @@ fn render(out: &mut impl Write, menu: &Menu, truecolor: bool) -> io::Result<()> 
     y = draw_menu(out, menu, center(term_w, BOX_INNER + 2), y)?;
     draw_hints(out, term_w, y + 1)?;
 
+    if let Some(text) = notice {
+        queue!(
+            out,
+            MoveTo(center(term_w, text.chars().count()), y + 3),
+            Print(text.yellow())
+        )?;
+    }
+
     out.flush()
 }
 
@@ -109,7 +128,12 @@ fn draw_menu(out: &mut impl Write, menu: &Menu, x: u16, mut y: u16) -> io::Resul
         let label = format!("{label:<23}");
         queue!(out, MoveTo(x, y), Print("│".dark_grey()))?;
         if i == menu.selected {
-            queue!(out, Print("  ▸ ".cyan()), Print(label.bold()), Print(key.cyan().bold()))?;
+            queue!(
+                out,
+                Print("  ▸ ".cyan()),
+                Print(label.bold()),
+                Print(key.cyan().bold())
+            )?;
         } else {
             queue!(out, Print("    "), Print(label), Print(key.dark_grey()))?;
         }
@@ -133,7 +157,11 @@ fn draw_hints(out: &mut impl Write, term_w: u16, y: u16) -> io::Result<()> {
         if i > 0 {
             queue!(out, Print(" · ".dark_grey()))?;
         }
-        queue!(out, Print(key.bold()), Print(format!(" {desc}").dark_grey()))?;
+        queue!(
+            out,
+            Print(key.bold()),
+            Print(format!(" {desc}").dark_grey())
+        )?;
     }
     Ok(())
 }
@@ -142,22 +170,38 @@ fn center(term_w: u16, content_w: usize) -> u16 {
     term_w.saturating_sub(content_w as u16) / 2
 }
 
-pub fn run() -> io::Result<MenuItem> {
+pub fn run(notice: &Notice) -> io::Result<MenuItem> {
     let _guard = TerminalGuard::new()?;
     let mut out = io::stdout();
     let mut menu = Menu::default();
     let truecolor = logo::supports_truecolor();
+    let mut shown: Option<String> = None;
+    let mut dirty = true;
 
     loop {
-        render(&mut out, &menu, truecolor)?;
+        let current = notice.lock().unwrap().clone();
+        if current != shown {
+            shown = current;
+            dirty = false;
+        }
 
-        if let Event::Key(key) = event::read()? {
-            if key.kind != KeyEventKind::Press {
-                continue;
+        if dirty {
+            render(&mut out, &menu, truecolor, shown.as_deref())?;
+            dirty = false;
+        }
+
+        if !event::poll(Duration::from_millis(250))? {
+            continue;
+        }
+        match event::read()? {
+            Event::Key(key) if key.kind == KeyEventKind::Press => {
+                if let Outcome::Choose(item) = menu.handle(key) {
+                    return Ok(item);
+                }
+                dirty = true;
             }
-            if let Outcome::Choose(item) = menu.handle(key) {
-                return Ok(item);
-            }
+            Event::Resize(..) => dirty = true,
+            _ => {}
         }
     }
 }
