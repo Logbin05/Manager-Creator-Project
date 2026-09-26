@@ -1,6 +1,6 @@
 [package]
 name = "manager-creator-project"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2024"
 description = "Interactive project generator: pick a template, pick the libraries, get a ready-to-run project"
 license = "MIT"
