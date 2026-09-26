@@ -5,4 +5,5 @@ pub mod questions;
 
 pub use generate::generate;
 pub use model::ReactAnswers;
+pub use manager_packet::PackageManager;
 pub use questions::{ask_arch, ask_libs, ask_pm, check_name};
