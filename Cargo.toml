@@ -1,8 +1,8 @@
 [package]
 name = "manager-creator-project"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
-description = "Interactive project generator: Rust backend and React with your choice of libraries"
+description = "Interactive project generator: pick a template, pick the libraries, get a ready-to-run project"
 license = "MIT"
 repository = "https://github.com/Logbin05/manager-creator-project"
 readme = "README.md"
