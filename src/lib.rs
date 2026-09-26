@@ -1,20 +1,49 @@
+pub mod config;
 pub mod process;
+pub mod settings;
 pub mod spec;
-pub mod stacks;
+pub mod templates;
+pub mod toolchain;
 pub mod ui;
+pub mod update;
 pub mod wizard;
 
-use std::io;
+use std::{
+    io,
+    sync::{Arc, Mutex},
+    thread,
+};
 use ui::start_screen::{self, MenuItem};
 pub const APP_NAME: &str = "Manager Creator Project";
+use crate::{config::Config, ui::start_screen::Notice};
 
 pub fn run() -> io::Result<()> {
-    loop {
-        match start_screen::run()? {
-            MenuItem::NewProject => {
-                let Some(spec) = wizard::run()? else { continue };
+    dotenvy::dotenv().ok();
+    let mut cfg = Config::load();
+    if let Some(dir) = &cfg.projects_dir {
+        std::env::set_current_dir(dir)?;
+    }
 
-                match stacks::generate(&spec) {
+    let notice: Notice = Arc::new(Mutex::new(None));
+    if cfg.check_updates && cfg.update_check_due() {
+        cfg.mark_update_checked();
+        cfg.save()?;
+        let notice = Arc::clone(&notice);
+        thread::spawn(move || {
+            if let Ok(Some(u)) = update::check() {
+                *notice.lock().unwrap() =
+                    Some(format!("v{} is available · see Settings", u.version));
+            }
+        });
+    }
+    loop {
+        match start_screen::run(&notice)? {
+            MenuItem::NewProject => {
+                let Some(spec) = wizard::run(&cfg)? else {
+                    continue;
+                };
+
+                match templates::generated::generate(spec.template(), &spec.name, &spec.answers) {
                     Ok(()) => {
                         let path = std::env::current_dir()?.join(&spec.name);
                         cliclack::note(
@@ -28,6 +57,7 @@ pub fn run() -> io::Result<()> {
                 }
                 return Ok(());
             }
+            MenuItem::Settings => settings::run(&mut cfg)?,
             MenuItem::Quit => return Ok(()),
             _ => {}
         }
