@@ -1,0 +1,103 @@
+schema = 1
+id = "rust-axum"
+name = "Rust · Backend"
+hint = "axum + tokio, HTTP/1.1–3"
+author = "Logbin05"
+order = 0
+run_hint = "cargo run"
+
+[toolchain]
+manager = ["cargo"]
+
+
+[[steps]]
+phase = "create"
+program = "cargo"
+args = ["new", "{{name}}"]
+
+[[steps]]
+phase = "setup"
+program = "cargo"
+args = ["add", "tokio", "--features", "full"]
+
+[[steps]]
+phase = "setup"
+program = "cargo"
+args = ["add", "serde", "--features", "derive"]
+
+[[steps]]
+phase = "setup"
+program = "cargo"
+args = ["add", "tracing", "tracing-subscriber"]
+
+[[steps]]
+phase = "libs"
+program = "cargo"
+args = ["add", "{{packages}}"]
+each = true          # у каждого крейта свои фичи, одной командой не поставить
+
+# ── Версия HTTP: свои зависимости и свой main.rs ──
+
+[[layouts]]
+id = "h1"
+label = "HTTP/1.1"
+hint = "axum, simplest start"
+[[layouts.steps]]
+phase = "setup"
+program = "cargo"
+args = ["add", "axum"]
+
+[[layouts]]
+id = "h2"
+label = "HTTP/2"
+hint = "axum + h2c, no TLS"
+[[layouts.steps]]
+phase = "setup"
+program = "cargo"
+args = ["add", "axum", "--features", "http2"]
+
+[[layouts]]
+id = "h3"
+label = "HTTP/3"
+hint = "quinn + h3, experimental"
+[[layouts.steps]]
+phase = "setup"
+program = "cargo"
+args = ["add", "quinn", "h3", "h3-quinn"]
+
+# ── Библиотеки ──
+
+[[libs]]
+label = "sqlx"
+packages = ["sqlx", "--features", "runtime-tokio,postgres"]
+hint = "PostgreSQL, migrations"
+
+[[libs]]
+label = "redis"
+packages = ["redis", "--features", "tokio-comp"]
+hint = "cache, sessions"
+
+[[libs]]
+label = "tower-http"
+packages = ["tower-http", "--features", "cors,trace"]
+hint = "CORS, request logging"
+
+[[libs]]
+label = "thiserror"
+packages = ["thiserror"]
+hint = "typed errors"
+
+[[libs]]
+label = "anyhow"
+packages = ["anyhow"]
+hint = "simple errors in main"
+
+[[libs]]
+label = "dotenvy"
+packages = ["dotenvy"]
+hint = ".env loading"
+
+[[libs]]
+label = "uuid"
+packages = ["uuid", "--features", "v4,serde"]
+hint = "identifiers"
