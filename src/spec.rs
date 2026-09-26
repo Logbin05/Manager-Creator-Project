@@ -1,25 +1,24 @@
-use crate::stacks::{react::ReactAnswers, rust::RustAnswers, Stack};
+use crate::templates::{
+  generated::{self, TemplateAnswer}, structures::Template, template,
+};
 
 #[derive(Debug, Default)]
 pub struct ProjectSpec {
-    pub stack: Stack,
+    pub template: usize,
     pub name: String,
-    pub rust: RustAnswers,
-    pub react: ReactAnswers,
+    pub answers: TemplateAnswer,
 }
 
 impl ProjectSpec {
+    pub fn template(&self) -> &'static Template {
+        &template::ALL[self.template]
+    }
+
     pub fn summary(&self) -> String {
-        match self.stack {
-            Stack::RustBackend => self.rust.summary(),
-            Stack::React => self.react.summary(),
-        }
+        self.answers.summary(self.template())
     }
 
     pub fn run_hint(&self) -> String {
-        match self.stack {
-            Stack::RustBackend => format!("cd {} && cargo run", self.name),
-            Stack::React => format!("cd {} && {} run dev", self.name, self.react.pm.label()),
-        }
+        generated::run_hint(self.template(), &self.name, &self.answers)
     }
 }
