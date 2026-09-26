@@ -4,7 +4,7 @@ version = "0.2.1"
 edition = "2024"
 description = "Interactive project generator: pick a template, pick the libraries, get a ready-to-run project"
 license = "MIT"
-repository = "https://github.com/Logbin05/manager-creator-project"
+repository = "https://github.com/Logbin05/Manager-Creator-Project"
 readme = "README.md"
 
 [[bin]]
@@ -13,7 +13,6 @@ path = "src/main.rs"
 
 [dependencies]
 cliclack = "0.5.6"
-console-subscriber = "0.5.0"
 crossterm = "0.29.0"
 dirs = "7.0.0"
 dotenvy = "0.15.7"
@@ -23,3 +22,8 @@ semver = "1.0.28"
 serde = { version = "1.0.229", features = ["derive"] }
 toml = "1.1.6"
 ureq = { version = "3.4.2", features = ["json"] }
+
+# The profile that 'dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"
