@@ -1,0 +1,75 @@
+schema = 1
+id = "vanilla"
+name = "Vanilla · Frontend"
+hint = "HTML, CSS, JS — no framework"
+author = "Logbin05"
+order = 1
+run_hint = "{{manager}} run dev"
+
+[toolchain]
+manager = ["npm", "bun", "pnpm"]
+
+# Библиотеки ставятся только когда выбран Vite —
+# без package.json их некуда класть
+[[steps]]
+phase = "libs"
+program = "{{manager}}"
+args = ["add", "{{packages}}"]
+
+[[layouts]]
+id = "plain"
+label = "Plain files"
+hint = "no build step, open index.html in a browser"
+
+[[layouts]]
+id = "vite"
+label = "Vite"
+hint = "dev server, hot reload, bundling"
+[[layouts.steps]]
+phase = "create"
+program = "{{manager.runner}}"
+args = ["create-vite@latest", "{{name}}", "--template", "vanilla", "--no-interactive"]
+[[layouts.steps]]
+phase = "setup"
+program = "{{manager}}"
+args = ["install"]
+
+[[libs]]
+label = "alpinejs"
+packages = ["alpinejs"]
+hint = "reactivity right in the markup"
+
+[[libs]]
+label = "htmx"
+packages = ["htmx.org"]
+hint = "AJAX via HTML attributes"
+
+[[libs]]
+label = "lit"
+packages = ["lit"]
+hint = "web components"
+
+[[libs]]
+label = "sass"
+packages = ["sass"]
+hint = "SCSS instead of plain CSS"
+
+[[libs]]
+label = "normalize.css"
+packages = ["normalize.css"]
+hint = "cross-browser CSS reset"
+
+[[libs]]
+label = "chart.js"
+packages = ["chart.js"]
+hint = "charts on canvas"
+
+[[libs]]
+label = "swiper"
+packages = ["swiper"]
+hint = "sliders and carousels"
+
+[[libs]]
+label = "nanoid"
+packages = ["nanoid"]
+hint = "short unique ids"
