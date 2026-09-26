@@ -1,0 +1,141 @@
+schema = 1
+id = "react-vite"
+name = "React · Frontend"
+hint = "Vite + React + TypeScript"
+author = "Logbin05"
+order = 0
+run_hint = "{{manager}} run dev"
+
+[toolchain]
+manager = ["npm", "bun", "pnpm"]
+
+
+[[steps]]
+phase = "create"
+program = "{{manager.runner}}"
+args = ["create-vite@latest", "{{name}}", "--template", "react-ts", "--no-interactive"]
+
+[[steps]]
+phase = "setup"
+program = "{{manager}}"
+args = ["install"]
+
+[[steps]]
+phase = "libs"
+program = "{{manager}}"
+args = ["add", "{{packages}}"]
+
+[[layouts]]
+id = "modular"
+label = "Modular"
+hint = "modules/ + core, libs"
+
+[[layouts]]
+id = "fsd"
+label = "Feature-Sliced Design"
+hint = "app → pages → widgets → …"
+
+[[layouts]]
+id = "feature-oriented"
+label = "Feature Oriented"
+hint = "features/ by business logic"
+
+[[layouts]]
+id = "atomic"
+label = "Atomic Design"
+hint = "atoms → molecules → organisms"
+
+[[layouts]]
+id = "classic"
+label = "Components / Containers"
+hint = "as shown in tutorials"
+
+[[libs]]
+label = "react-router"
+packages = ["react-router"]
+hint = "routing"
+
+[[libs]]
+label = "tanstack-query"
+packages = ["@tanstack/react-query"]
+hint = "API requests, cache"
+
+[[libs]]
+label = "axios"
+packages = ["axios"]
+hint = "HTTP client"
+
+[[libs]]
+label = "zustand"
+packages = ["zustand"]
+hint = "lightweight state"
+
+[[libs]]
+label = "redux-toolkit"
+packages = ["@reduxjs/toolkit", "react-redux"]
+hint = "Redux"
+
+[[libs]]
+label = "react-hook-form"
+packages = ["react-hook-form", "zod", "@hookform/resolvers"]
+hint = "forms + validation"
+
+[[libs]]
+label = "clsx"
+packages = ["clsx"]
+hint = "CSS class merging"
+
+[[libs]]
+label = "tailwindcss"
+packages = ["tailwindcss", "@tailwindcss/vite"]
+hint = "utility-first CSS"
+
+[[libs]]
+label = "shadcn-deps"
+packages = ["class-variance-authority", "clsx", "tailwind-merge", "lucide-react"]
+hint = "primitives for shadcn/ui components"
+
+[[libs]]
+label = "framer-motion"
+packages = ["motion"]
+hint = "animations"
+
+[[libs]]
+label = "date-fns"
+packages = ["date-fns"]
+hint = "date handling"
+
+[[libs]]
+label = "i18next"
+packages = ["i18next", "react-i18next"]
+hint = "internationalization"
+
+[[libs]]
+label = "socket.io"
+packages = ["socket.io-client"]
+hint = "websockets"
+
+[[libs]]
+label = "recharts"
+packages = ["recharts"]
+hint = "charts"
+
+[[libs]]
+label = "react-table"
+packages = ["@tanstack/react-table"]
+hint = "headless data tables"
+
+[[libs]]
+label = "vitest"
+packages = ["vitest", "@testing-library/react", "@testing-library/jest-dom", "jsdom"]
+hint = "tests"
+
+[[libs]]
+label = "eslint + prettier"
+packages = ["eslint", "prettier", "eslint-config-prettier", "eslint-plugin-react-hooks"]
+hint = "linting and formatting"
+
+[[libs]]
+label = "msw"
+packages = ["msw"]
+hint = "API mocking in dev and tests"
