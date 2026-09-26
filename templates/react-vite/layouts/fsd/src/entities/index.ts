@@ -1,0 +1,2 @@
+// Entities: business objects
+export {};
