@@ -1,0 +1,2 @@
+// Templates: page layouts
+export {};
