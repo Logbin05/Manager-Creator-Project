@@ -15,3 +15,11 @@ path = "src/main.rs"
 cliclack = "0.5.6"
 console-subscriber = "0.5.0"
 crossterm = "0.29.0"
+dirs = "7.0.0"
+dotenvy = "0.15.7"
+include_dir = "0.7.4"
+
+semver = "1.0.28"
+serde = { version = "1.0.229", features = ["derive"] }
+toml = "1.1.6"
+ureq = { version = "3.4.2", features = ["json"] }
