@@ -1,0 +1,123 @@
+schema = 1
+id = "rust-monolith"
+name = "Rust · Monolith"
+hint = "axum + Postgres, classic or modular layout"
+author = "Logbin05"
+order = 0
+run_hint = "docker compose up -d && cargo run"
+
+[toolchain]
+manager = ["cargo"]
+
+# ── 1. Скелет ──
+[[steps]]
+phase = "create"
+program = "cargo"
+args = ["new", "{{name}}"]
+
+# ── 2. Базовые зависимости ──
+# Разбиты по строкам, потому что у каждой свои фичи:
+# одной командой `cargo add` их не задать.
+
+[[steps]]
+phase = "setup"
+program = "cargo"
+args = ["add", "tokio", "--features", "full"]
+
+[[steps]]
+phase = "setup"
+program = "cargo"
+args = ["add", "axum"]
+
+[[steps]]
+phase = "setup"
+program = "cargo"
+args = ["add", "tower-http", "--features", "trace,cors"]
+
+[[steps]]
+phase = "setup"
+program = "cargo"
+args = ["add", "sqlx", "--no-default-features", "--features", "runtime-tokio,tls-rustls-ring,postgres,uuid,chrono,macros,migrate"]
+
+[[steps]]
+phase = "setup"
+program = "cargo"
+args = ["add", "uuid", "--features", "v7,serde"]
+
+[[steps]]
+phase = "setup"
+program = "cargo"
+args = ["add", "chrono", "--features", "serde"]
+
+[[steps]]
+phase = "setup"
+program = "cargo"
+args = ["add", "serde", "--features", "derive"]
+
+[[steps]]
+phase = "setup"
+program = "cargo"
+args = ["add", "serde_json", "tracing", "thiserror", "anyhow", "dotenvy"]
+
+[[steps]]
+phase = "setup"
+program = "cargo"
+args = ["add", "tracing-subscriber", "--features", "env-filter"]
+
+# ── 3. Библиотеки на выбор ──
+# each: у каждой свои фичи, поэтому по команде на запись
+
+[[steps]]
+phase = "libs"
+program = "cargo"
+args = ["add", "{{packages}}"]
+each = true
+
+# ── Архитектура ──
+
+[[layouts]]
+id = "classic"
+label = "Classic layered"
+hint = "routes / services / repositories"
+
+[[layouts]]
+id = "modular"
+label = "Modular"
+hint = "modules/<name>/ with its own domain, repo, service, routes"
+
+# ── Библиотеки ──
+
+[[libs]]
+label = "http2"
+packages = ["axum", "--features", "http2"]
+hint = "HTTP/2 without TLS (h2c)"
+
+[[libs]]
+label = "redis"
+packages = ["redis", "--features", "tokio-comp,connection-manager"]
+hint = "cache, sessions"
+
+[[libs]]
+label = "auth"
+packages = ["jsonwebtoken", "argon2"]
+hint = "JWT + password hashing"
+
+[[libs]]
+label = "validation"
+packages = ["validator", "--features", "derive"]
+hint = "declarative DTO validation"
+
+[[libs]]
+label = "openapi"
+packages = ["utoipa", "--features", "axum_extras"]
+hint = "OpenAPI schema from code"
+
+[[libs]]
+label = "opentelemetry"
+packages = ["tracing-opentelemetry", "opentelemetry-otlp"]
+hint = "traces to Jaeger / Tempo"
+
+[[libs]]
+label = "testing"
+packages = ["reqwest", "--dev", "--features", "json"]
+hint = "HTTP client for integration tests"

@@ -20,8 +20,11 @@ use crate::{config::Config, ui::start_screen::Notice};
 pub fn run() -> io::Result<()> {
     dotenvy::dotenv().ok();
     let mut cfg = Config::load();
-    if let Some(dir) = &cfg.projects_dir {
-        std::env::set_current_dir(dir)?;
+     if let Some(dir) = &cfg.projects_dir {
+        if let Err(e) = std::env::set_current_dir(dir) {
+            eprintln!("warning: cannot use projects directory {}: {e}", dir.display());
+            eprintln!("         creating projects in the current directory instead");
+        }
     }
 
     let notice: Notice = Arc::new(Mutex::new(None));
