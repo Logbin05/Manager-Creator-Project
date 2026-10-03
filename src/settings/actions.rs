@@ -1,8 +1,8 @@
+use crate::{config::Config, settings::Item, update};
 use std::{
     io::{self, ErrorKind},
     path::PathBuf,
 };
-use crate::{config::Config, settings::Item, update};
 
 pub fn open(item: Item, cfg: &mut Config) -> io::Result<()> {
     match item {
@@ -22,16 +22,28 @@ fn check_now(cfg: &mut Config) -> io::Result<()> {
 
     match update::check() {
         Ok(Some(u)) => {
-            spinner.stop(format!("Update available: v{} → v{}", update::CURRENT, u.version));
-            cliclack::note("How to update", format!("{}\n\nNotes: {}", update::install_hint(), u.url))?;
+            spinner.stop(format!(
+                "Update available: v{} → v{}",
+                update::CURRENT,
+                u.version
+            ));
+            cliclack::note(
+                "How to update",
+                format!("{}\n\nNotes: {}", update::install_hint(), u.url),
+            )?;
         }
-        Ok(None) => spinner.stop(format!("You're on the latest version (v{})", update::CURRENT)),
+        Ok(None) => spinner.stop(format!(
+            "You're on the latest version (v{})",
+            update::CURRENT
+        )),
         Err(e) => spinner.error(format!("Could not check: {e}")),
     }
 
     cfg.mark_update_checked();
     cliclack::outro("Press enter to go back")?;
-    let _ = cliclack::confirm("Back to settings?").initial_value(true).interact();
+    let _ = cliclack::confirm("Back to settings?")
+        .initial_value(true)
+        .interact();
     Ok(())
 }
 
@@ -58,7 +70,10 @@ fn ask_projects_dir(cfg: &mut Config) -> io::Result<()> {
 
     if let Some(s) = cancelable(input)? {
         let s = s.trim();
-        cfg.projects_dir = (!s.is_empty()).then(|| expand_home(s));
+        cfg.projects_dir = (!s.is_empty()).then(|| {
+            let path = expand_home(s);
+            path.canonicalize().unwrap_or(path)
+        });
     }
     cliclack::outro("Saved")?;
     Ok(())
